@@ -1,0 +1,91 @@
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+
+def flutterRoot = localProperties.getProperty('flutter.sdk')
+if (flutterRoot == null) {
+    throw FileNotFoundException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
+}
+
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+if (flutterVersionCode == null) {
+    flutterVersionCode = '2'
+}
+
+def flutterVersionName = localProperties.getProperty('flutter.versionName')
+if (flutterVersionName == null) {
+    flutterVersionName = '1.0.2'
+}
+
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
+
+android {
+    compileSdkVersion 33
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+
+
+    defaultConfig {
+        applicationId "com.emart.customer"
+        minSdkVersion 26
+        multiDexEnabled = true
+        targetSdkVersion 33
+        versionCode flutterVersionCode.toInteger()
+        versionName flutterVersionName
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    buildTypes {
+        release {
+            // TODO: Add your own signing config for the release build.
+            // Signing with the debug keys for now, so `flutter run --release` works.
+            signingConfig signingConfigs.debug
+        }
+    }
+    lint {
+        checkReleaseBuilds false
+        disable 'InvalidPackage'
+    }
+    namespace 'com.emart.customer'
+
+    configurations.all {
+        exclude group: "com.google.mlkit", module: "barcode-scanning"
+    }
+}
+
+flutter {
+    source '../..'
+}
+
+dependencies {
+//    constraints { implementation('com.stripe:stripe-android') { version { strictly '20.11.0' } } }
+//    constraints { implementation('com.stripe:financial-connections') { version { strictly '20.11.0' } } }
+
+    implementation "com.squareup.okhttp3:okhttp:4.9.1"
+    implementation platform('com.google.firebase:firebase-bom:30.0.0')
+    implementation 'com.google.firebase:firebase-crashlytics'
+    implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.android.gms:play-services-location:20.0.0'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'androidx.multidex:multidex:2.0.1'
+
+    implementation('com.paytm.appinvokesdk:appinvokesdk:1.6.11') {
+        exclude group: "com.squareup.okhttp3", module: 'okhttp3'
+    }
+    implementation 'com.google.android.gms:play-services-mlkit-barcode-scanning:18.1.0'
+    implementation 'androidx.browser:browser:1.4.0'
+
+    implementation 'com.stripe:stripe-android:17.1.1'
+}
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.firebase.crashlytics'
